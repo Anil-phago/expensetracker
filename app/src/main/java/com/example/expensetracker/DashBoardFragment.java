@@ -27,61 +27,13 @@ import java.util.Date;
 
 import Model.Data;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link DashBoardFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class DashBoardFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public DashBoardFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment DashBoardFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static DashBoardFragment newInstance(String param1, String param2) {
-        DashBoardFragment fragment = new DashBoardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-
-        }
-
-    }
-//floating button
-
+    //floating button
     private FloatingActionButton fab_main_btn;
     private  FloatingActionButton fab_income_btn;
     private  FloatingActionButton fab_expense_btn;
@@ -95,10 +47,10 @@ public class DashBoardFragment extends Fragment {
     //animation
     private Animation FadeOpen,FadeClose;
 
+    int expensesResult, incomeResult;
 
     //dashboard income and expense result
-    private  TextView totalIncomeResult;
-    private TextView totalExpenseResult;
+    private TextView balance, txtBalance;
 
 //firebae
 
@@ -106,25 +58,22 @@ public class DashBoardFragment extends Fragment {
     private DatabaseReference mIncomeDatabase;
     private DatabaseReference mExpenceDatabase;
 
-    //Recycler view
-    private RecyclerView mRecyclerIncome ;
-    private RecyclerView getmRecyclerExpense;
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View myview= inflater.inflate(R.layout.fragment_dash_board, container, false);
-
+        //total income and expense result set
+        balance = myview.findViewById(R.id.balance);
+        txtBalance = myview.findViewById(R.id.txtBalance);
 
         //firebase work
-mAuth = FirebaseAuth.getInstance();
-FirebaseUser mUser=mAuth.getCurrentUser();
-String uid=mUser.getUid();
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser mUser=mAuth.getCurrentUser();
+        String uid=mUser.getUid();
 
-mIncomeDatabase= FirebaseDatabase.getInstance().getReference().child("IncomeData").child(uid);
-mExpenceDatabase=FirebaseDatabase.getInstance().getReference().child("ExpenseData").child(uid);
+        mIncomeDatabase= FirebaseDatabase.getInstance().getReference().child("IncomeData").child(uid);
+        mExpenceDatabase=FirebaseDatabase.getInstance().getReference().child("ExpenseData").child(uid);
 
         //connect floating button to layout
         fab_main_btn=myview.findViewById(R.id.fb_main_plus_btn);
@@ -135,20 +84,9 @@ mExpenceDatabase=FirebaseDatabase.getInstance().getReference().child("ExpenseDat
         fab_income_txt=myview.findViewById(R.id.income_ft_text);
         fab_expense_txt=myview.findViewById(R.id.expense_ft_text);
 
-        //total income and expense result set
-        totalIncomeResult = myview.findViewById(R.id.income_set_result);
-        totalExpenseResult = myview.findViewById(R.id.expense_set_result);
-        //Recycler
-
-        mRecyclerIncome = myview.findViewById(R.id.recycler_income);
-        getmRecyclerExpense = myview.findViewById(R.id.recycler_expense);
-
-
         //animation connectivity
         FadeOpen= AnimationUtils.loadAnimation(getActivity(),R.anim.fade_open);
         FadeClose=AnimationUtils.loadAnimation(getActivity(),R.anim.fade_close);
-
-
 
         fab_main_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,42 +116,48 @@ mExpenceDatabase=FirebaseDatabase.getInstance().getReference().child("ExpenseDat
                     fab_expense_txt.setClickable(true);
                     isOpen=true;
                 }
-
             }
         });
 
-        //caculate
+        getTotalIncome(new Mycallback() {
+            @Override
+            public void onCallback(int a) {
+                incomeResult = a;
+            }
+        });
 
-     mExpenceDatabase.addValueEventListener(new ValueEventListener() {
-         @Override
-         public void onDataChange(@NonNull DataSnapshot snapshot) {
-             float totalSum =0;
-             for (DataSnapshot mysnap:snapshot.getChildren())
-             {
-                 Data data = mysnap.getValue(Data.class);
-                 totalSum+=data.getAmount();
-                 String stResult = String.valueOf(totalSum);
-                 totalExpenseResult.setText(stResult);
-             }
-         }
+        getTotalExpense(new Mycallback() {
+            @Override
+            public void onCallback(int a) {
+                expensesResult = a;
+            }
+        });
 
-         @Override
-         public void onCancelled(@NonNull DatabaseError error) {
+        if(incomeResult>expensesResult){
+            balance.setText(String.valueOf(incomeResult-expensesResult));
+            balance.setTextColor(ContextCompat.getColor(getContext(), R.color.income_color));
+            txtBalance.setTextColor(ContextCompat.getColor(getContext(), R.color.income_color));
+        }
 
-         }
+        if(expensesResult>incomeResult){
+            balance.setText(String.valueOf(expensesResult-incomeResult));
+            balance.setTextColor(ContextCompat.getColor(getContext(), R.color.expense_color));
+            txtBalance.setTextColor(ContextCompat.getColor(getContext(), R.color.expense_color));
+        }
 
-     });
+        return myview;
+    }
 
-        mIncomeDatabase.addValueEventListener(new ValueEventListener() {
+    private void getTotalExpense(Mycallback mycallback){
+        mExpenceDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                float totalSum =0;
+                int totalSum =0;
                 for (DataSnapshot mysnap:snapshot.getChildren())
                 {
                     Data data = mysnap.getValue(Data.class);
                     totalSum+=data.getAmount();
-                    String stResult = String.valueOf(totalSum);
-                    totalIncomeResult.setText(stResult);
+                    mycallback.onCallback(totalSum);
                 }
             }
 
@@ -223,22 +167,27 @@ mExpenceDatabase=FirebaseDatabase.getInstance().getReference().child("ExpenseDat
             }
 
         });
-//Recycler
-        LinearLayoutManager layoutManagerIncome = new LinearLayoutManager(getActivity(),LinearLayoutManager.HORIZONTAL,false);
-        layoutManagerIncome.setStackFromEnd(true);
-        layoutManagerIncome.setReverseLayout(true);
-        mRecyclerIncome.setHasFixedSize(true);
-        mRecyclerIncome.setLayoutManager(layoutManagerIncome);
+    }
 
+    private void getTotalIncome(Mycallback mycallback){
+        mIncomeDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalSum =0;
+                for (DataSnapshot mysnap:snapshot.getChildren())
+                {
+                    Data data = mysnap.getValue(Data.class);
+                    totalSum+=data.getAmount();
+                    mycallback.onCallback(totalSum);
+                }
+            }
 
-        LinearLayoutManager layoutManagerExpense = new LinearLayoutManager(getActivity(),LinearLayoutManager.HORIZONTAL,false);
-        layoutManagerExpense.setStackFromEnd(true);
-        layoutManagerExpense.setReverseLayout(true);
-        getmRecyclerExpense.setHasFixedSize(true);
-        getmRecyclerExpense.setLayoutManager(layoutManagerExpense);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
+            }
 
-        return myview;
+        });
     }
 
 
@@ -455,5 +404,9 @@ dialog.show();
             TextView mDate = mIncomeView.findViewById(R.id.date_Income_ds);
             mDate.setText(date);
         }
+    }
+
+    public interface Mycallback{
+        void onCallback(int a);
     }
 }

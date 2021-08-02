@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/dashboard"
+    <item android:id="@+id/navdashboard"
         android:title="DashBoard"
         android:icon="@drawable/dashboard"/>
 
-    <item android:id="@+id/income"
+    <item android:id="@+id/navincome"
         android:title="Income"
         android:icon="@drawable/income"/>
 
-    <item android:id="@+id/expense"
+    <item android:id="@+id/navexpense"
         android:title="Expense"
         android:icon="@drawable/expense"/>
 

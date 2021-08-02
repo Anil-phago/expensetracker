@@ -3,7 +3,6 @@ package com.example.expensetracker;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -18,12 +17,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-public class HomeActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener {
+public class HomeActivity extends AppCompatActivity {
 private BottomNavigationView bottomNavigationView;
-private FrameLayout frameLayout;
-private DashBoardFragment dashBoardFragment;
-private  IncomeFragment  incomeFragment;
-private  ExpenseFragment expenseFragment;
+private NavigationView navigationView;
+private DashBoardFragment dashBoardFragment = new DashBoardFragment();
+private  IncomeFragment  incomeFragment = new IncomeFragment();
+private  ExpenseFragment expenseFragment = new ExpenseFragment();
 
 private FirebaseAuth auth = FirebaseAuth.getInstance();
     @Override
@@ -42,17 +41,14 @@ private FirebaseAuth auth = FirebaseAuth.getInstance();
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        navigationView=findViewById(R.id.naView);
+//        navigationView.setNavigationItemSelectedListener(this);
 
-        NavigationView navigationView=findViewById(R.id.naView);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        dashBoardFragment=new DashBoardFragment();
-        incomeFragment=new IncomeFragment();
-        expenseFragment=new ExpenseFragment();
-        setFragment(dashBoardFragment);
+        FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.main_frame,dashBoardFragment);
+        fragmentTransaction.commit();
 
         bottomNavigationView=findViewById(R.id.bottomNavigationbar);
-        frameLayout=findViewById(R.id.main_frame);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -79,6 +75,43 @@ private FirebaseAuth auth = FirebaseAuth.getInstance();
                 }
             }
         });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment fragment = null;
+
+                switch (item.getItemId()) {
+                    case R.id.navdashboard:
+                        fragment = dashBoardFragment;
+                        bottomNavigationView.setItemBackgroundResource(R.color.dashboard_color);
+                        break;
+                    case R.id.navincome:
+                        fragment = incomeFragment;
+                        bottomNavigationView.setItemBackgroundResource(R.color.expense_color);
+                        break;
+                    case R.id.navexpense:
+                        fragment = expenseFragment;
+                        bottomNavigationView.setItemBackgroundResource(R.color.income_color);
+                        break;
+                    case R.id.logout:
+                        if (auth.getUid() != null) {
+                            auth.signOut();
+                            Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            finish();
+                            break;
+                        }
+                }
+                if(fragment!=null){
+                    FragmentTransaction ft=getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.main_frame,fragment).commit();
+                }
+                DrawerLayout drawerLayout=findViewById(R.id.drawer_layout);
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
     }
 
     private void setFragment(Fragment fragment) {
@@ -98,41 +131,5 @@ private FirebaseAuth auth = FirebaseAuth.getInstance();
         {
             super.onBackPressed();
         }
-
-    }
-
-    public  void displaySelectedListener(int itemId){
-        Fragment fragment=null;
-
-        switch (itemId){
-            case R.id.dashboard:
-                fragment=new DashBoardFragment();
-                break;
-            case R.id.income:
-                fragment=new IncomeFragment();
-                break;
-            case R.id.expense:
-                fragment=new ExpenseFragment();
-                break;
-            case R.id.logout:
-                if(auth.getUid()!= null) {
-                    auth.signOut();
-                    Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-        }
-
-        if(fragment!=null){
-            FragmentTransaction ft=getSupportFragmentManager().beginTransaction();
-            ft.replace(R.id.main_frame,fragment).commit();
-        }
-        DrawerLayout drawerLayout=findViewById(R.id.drawer_layout);
-        drawerLayout.closeDrawer(GravityCompat.START);
-    }
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        displaySelectedListener(item.getItemId());
-        return true;
     }
 }
