@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/nav_header"
+    android:orientation="vertical"
+    app:theme="@style/Base.CardView"
+   android:layout_height="200dp"
+    android:gravity="center">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_marginTop="100dp"
+        android:text="Expense Manager"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/white"/>
+
+        <ImageView
+            android:layout_width="115dp"
+            android:layout_height="62dp"
+            android:layout_marginLeft="90dp"
+            android:layout_marginTop="40dp"
+            android:src="@mipmap/logo"/>
+
+    </RelativeLayout>
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+d        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:text="Balance:"
+            android:layout_marginLeft="10dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:hint=" RS:10000800000"
+            android:textColorHint="#04B404"
+            android:layout_marginTop="55dp"
+            android:layout_marginLeft="80dp"
+            />
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>
