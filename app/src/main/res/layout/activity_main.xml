@@ -13,22 +13,23 @@
     >
 
     <ImageView
+        android:id="@+id/homepageImage"
         android:layout_width="331dp"
         android:layout_height="217dp"
-        android:layout_marginLeft="52dp"
         android:layout_marginTop="157dp"
+        android:layout_centerHorizontal="true"
         android:src="@mipmap/logo" />
 
     <TextView
         android:id="@+id/txtAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/homepageImage"
+        android:layout_centerHorizontal="true"
         android:text="app Name"
-        android:textStyle="bold"
         android:textColor="@color/white"
-        android:layout_marginLeft="150dp"
-        android:layout_marginTop="400dp"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>
 

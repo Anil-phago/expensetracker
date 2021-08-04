@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nav_header"
+    tools:context=".MainActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        >
+
+        <ImageView
+            android:id="@+id/progressImage"
+            android:layout_width="331dp"
+            android:layout_height="217dp"
+            android:layout_marginTop="157dp"
+            android:layout_centerHorizontal="true"
+            android:src="@mipmap/logo" />
+
+        <TextView
+            android:id="@+id/appNameThis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressImage"
+            android:layout_centerHorizontal="true"
+            android:text="Expense Tracker"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_below="@id/appNameThis"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            style="?android:attr/progressBarStyle"/>
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>

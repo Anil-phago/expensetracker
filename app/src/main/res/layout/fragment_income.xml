@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="#C9C0C0"
     android:layout_height="match_parent"
     tools:context=".IncomeFragment">
 
@@ -53,12 +52,12 @@
                android:layout_height="wrap_content">
 
                <TextView
-                   android:layout_width="wrap_content"
                    android:id="@+id/income_txt_result"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:text="Rs. 0"
                    android:textAppearance="?android:textAppearanceMedium"
-                   android:textColor="@android:color/black"
-                   android:text="00000.00"
-                   android:layout_height="wrap_content"/>
+                   android:textColor="@android:color/black" />
 
                <TextView
                    android:layout_width="90dp"
@@ -88,7 +87,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/recycler_id_income"
-        android:layout_height="match_parent">
-    </androidx.recyclerview.widget.RecyclerView>
+        android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/noIncomeTxt"
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No Income Added"
+        android:textAlignment="center"/>
 
 </LinearLayout>

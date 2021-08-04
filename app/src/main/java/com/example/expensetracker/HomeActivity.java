@@ -3,10 +3,16 @@ package com.example.expensetracker;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -25,6 +31,8 @@ private  IncomeFragment  incomeFragment = new IncomeFragment();
 private  ExpenseFragment expenseFragment = new ExpenseFragment();
 
 private FirebaseAuth auth = FirebaseAuth.getInstance();
+private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,13 +50,27 @@ private FirebaseAuth auth = FirebaseAuth.getInstance();
         toggle.syncState();
 
         navigationView=findViewById(R.id.naView);
+        bottomNavigationView=findViewById(R.id.bottomNavigationbar);
 //        navigationView.setNavigationItemSelectedListener(this);
 
         FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.main_frame,dashBoardFragment);
+        fragmentTransaction.replace(R.id.main_frame,new ProgressView());
+        bottomNavigationView.setVisibility(View.GONE);
+        toolbar.setVisibility(View.GONE);
         fragmentTransaction.commit();
 
-        bottomNavigationView=findViewById(R.id.bottomNavigationbar);
+        getUserName(new UserCallback() {
+            @Override
+            public void onCallback(String user) {
+                if(user != null){
+                    FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.main_frame,new DashBoardFragment());
+                    bottomNavigationView.setVisibility(View.VISIBLE);
+                    toolbar.setVisibility(View.VISIBLE);
+                    fragmentTransaction.commit();
+                }
+            }
+        });
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -88,11 +110,11 @@ private FirebaseAuth auth = FirebaseAuth.getInstance();
                         break;
                     case R.id.navincome:
                         fragment = incomeFragment;
-                        bottomNavigationView.setItemBackgroundResource(R.color.expense_color);
+                        bottomNavigationView.setItemBackgroundResource(R.color.income_color);
                         break;
                     case R.id.navexpense:
                         fragment = expenseFragment;
-                        bottomNavigationView.setItemBackgroundResource(R.color.income_color);
+                        bottomNavigationView.setItemBackgroundResource(R.color.expense_color);
                         break;
                     case R.id.logout:
                         if (auth.getUid() != null) {
@@ -118,6 +140,28 @@ private FirebaseAuth auth = FirebaseAuth.getInstance();
         FragmentTransaction fragmentTransaction=getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_frame,fragment);
         fragmentTransaction.commit();
+    }
+
+    private void getUserName(UserCallback callback){
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(auth.getUid() != null){
+                    String username = snapshot.child("Users").child(auth.getUid())
+                            .child("username").getValue(String.class);
+                    callback.onCallback(username);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    public interface UserCallback{
+        void onCallback(String user);
     }
 
     @Override

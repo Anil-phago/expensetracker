@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_height="match_parent"
+    android:background="#253055"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
     tools:context=".DashBoardFragment"
@@ -13,28 +14,43 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginTop="10dp"
-        android:elevation="7dp">
+        android:elevation="7dp"
+        android:backgroundTint="@color/dashboard_color">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="Username"
+                android:textColor="@color/white"
+                android:layout_marginStart="10dp"/>
 
             <TextView
                 android:id="@+id/txtBalance"
-                android:text="Balance"
-                android:layout_centerHorizontal="true"
                 android:layout_width="wrap_content"
-                android:textSize="18dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="Balance"
+                android:layout_toStartOf="@+id/balance"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/white"
+                android:textSize="16dp" />
 
             <TextView
                 android:id="@+id/balance"
-                android:text="000"
-                android:textSize="18dp"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/txtBalance"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:text="0"
+                android:textColor="@color/white"
+                android:textSize="16dp" />
 
         </RelativeLayout>
 
@@ -53,18 +69,70 @@
                 android:layout_marginTop="10dp"
                 android:layout_height="wrap_content">
                 <TextView
+                    android:id="@+id/txtIncomePie"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="INCOME"
+                    android:text="Income"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
                     android:textAppearance="?android:textAppearanceLarge"
                     android:padding="10dp" />
 
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/incomePieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"/>
+
                 <TextView
+                    android:id="@+id/noIncomePie"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="EXPENSE"
+                    android:text="No Income Added"
+                    android:padding="10dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"/>
+
+                <TextView
+                    android:id="@+id/totalPieIncome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total Income"
+                    android:layout_gravity="center"
+                    android:textColor="#AE9C93"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/txtExpensePie"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="Expense"
+                    android:textColor="@color/white"
                     android:textAppearance="?android:textAppearanceLarge"
                     android:padding="10dp"/>
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/expensePieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"/>
+
+                <TextView
+                    android:id="@+id/noExpensePie"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No Expense Added"
+                    android:padding="10dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"/>
+
+                <TextView
+                    android:id="@+id/totalPieExpense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Total Income"
+                    android:textColor="#AE9C93"
+                    android:layout_marginEnd="10dp"/>
 
             </LinearLayout>
         </ScrollView>

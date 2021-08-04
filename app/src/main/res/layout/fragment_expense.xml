@@ -59,7 +59,7 @@
                     android:layout_width="1000dp"
                     android:layout_height="38dp"
                     android:layout_marginRight="10dp"
-                    android:text="00000.00"
+                    android:text="Rs. 0"
                     android:textAppearance="?android:textAppearanceMedium"
                     android:textColor="@android:color/black" />
 
@@ -91,7 +91,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/recycler_id_expense"
-        android:layout_height="match_parent">
-    </androidx.recyclerview.widget.RecyclerView>
+        android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/noExpenseTxt"
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No Expenses Added"
+        android:textAlignment="center"/>
 
 </LinearLayout>

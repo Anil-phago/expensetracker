@@ -1,6 +1,8 @@
 package com.example.expensetracker;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,6 +15,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -23,6 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import Model.Data;
@@ -47,16 +56,20 @@ public class DashBoardFragment extends Fragment {
     //animation
     private Animation FadeOpen,FadeClose;
 
-    int expensesResult, incomeResult;
+    int expensesResult = 0, incomeResult = 0;
 
+    private ArrayList<Data> ourPieData = new ArrayList<>();
+    private PieChart expensePieChart, incomePieChart;
     //dashboard income and expense result
-    private TextView balance, txtBalance;
+    private TextView balance, txtBalance, username, totalPieExpense, totalPieIncome,
+                    noIncomePie, noExpensePie;
 
 //firebae
 
     private FirebaseAuth mAuth;
     private DatabaseReference mIncomeDatabase;
     private DatabaseReference mExpenceDatabase;
+    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,6 +96,18 @@ public class DashBoardFragment extends Fragment {
         //connect floating text
         fab_income_txt=myview.findViewById(R.id.income_ft_text);
         fab_expense_txt=myview.findViewById(R.id.expense_ft_text);
+
+        //pieChart view
+        expensePieChart = myview.findViewById(R.id.expensePieChart);
+        incomePieChart = myview.findViewById(R.id.incomePieChart);
+
+        totalPieExpense = myview.findViewById(R.id.totalPieExpense);
+        totalPieIncome = myview.findViewById(R.id.totalPieIncome);
+
+        username = myview.findViewById(R.id.username);
+
+        noIncomePie = myview.findViewById(R.id.noIncomePie);
+        noExpensePie = myview.findViewById(R.id.noExpensePie);
 
         //animation connectivity
         FadeOpen= AnimationUtils.loadAnimation(getActivity(),R.anim.fade_open);
@@ -119,45 +144,109 @@ public class DashBoardFragment extends Fragment {
             }
         });
 
-        getTotalIncome(new Mycallback() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onCallback(int a) {
-                incomeResult = a;
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(mAuth.getUid() != null){
+                    String myUser = snapshot.child("Users").child(mAuth.getUid())
+                            .child("username").getValue(String.class);
+                    username.setText("Welcome " + myUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
 
-        getTotalExpense(new Mycallback() {
+        getTotalIncome();
+        getTotalExpense();
+        getBalance(new Mycallback() {
+            @SuppressLint("SetTextI18n")
             @Override
-            public void onCallback(int a) {
+            public void onCallback(int a, int b) {
                 expensesResult = a;
+                incomeResult = b;
+
+                if(getContext() != null){
+                    if(incomeResult>expensesResult){
+                        int cal = incomeResult - expensesResult;
+                        balance.setText("Rs. " + cal);
+                        balance.setTextColor(ContextCompat.getColor(getContext(), R.color.income_color));
+                        txtBalance.setTextColor(ContextCompat.getColor(getContext(), R.color.income_color));
+                    }
+
+                    if(expensesResult>incomeResult){
+                        int cal = expensesResult - incomeResult;
+                        balance.setText("Rs. " + cal);
+                        balance.setTextColor(ContextCompat.getColor(getContext(), R.color.expense_color));
+                        txtBalance.setTextColor(ContextCompat.getColor(getContext(), R.color.expense_color));
+                    }
+                }
             }
         });
-
-        if(incomeResult>expensesResult){
-            balance.setText(String.valueOf(incomeResult-expensesResult));
-            balance.setTextColor(ContextCompat.getColor(getContext(), R.color.income_color));
-            txtBalance.setTextColor(ContextCompat.getColor(getContext(), R.color.income_color));
-        }
-
-        if(expensesResult>incomeResult){
-            balance.setText(String.valueOf(expensesResult-incomeResult));
-            balance.setTextColor(ContextCompat.getColor(getContext(), R.color.expense_color));
-            txtBalance.setTextColor(ContextCompat.getColor(getContext(), R.color.expense_color));
-        }
 
         return myview;
     }
 
-    private void getTotalExpense(Mycallback mycallback){
+    private void getBalance(Mycallback mycallback){
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int expenseTotal = 0, incomeTotal = 0;
+                if(mAuth.getUid() != null){
+                    for(DataSnapshot e: snapshot.child("ExpenseData").child(mAuth.getUid())
+                            .getChildren()){
+                    Data eData = e.getValue(Data.class);
+                    if(eData != null){
+                        expenseTotal += eData.getAmount();
+                    }
+                }
+                for(DataSnapshot i: snapshot.child("IncomeData").child(mAuth.getUid())
+                        .getChildren()){
+                    Data iData = i.getValue(Data.class);
+                    if(iData != null){
+                        incomeTotal += iData.getAmount();
+                    }
+                }
+                if(expenseTotal!=0 || incomeTotal!=0){
+                    totalPieExpense.setText("Rs. " + expenseTotal);
+                    totalPieIncome.setText("Rs. " + incomeTotal);
+                    mycallback.onCallback(expenseTotal, incomeTotal);
+                }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void getTotalExpense(){
         mExpenceDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int totalSum =0;
-                for (DataSnapshot mysnap:snapshot.getChildren())
-                {
+                ourPieData.clear();
+                for (DataSnapshot mysnap:snapshot.getChildren()) {
                     Data data = mysnap.getValue(Data.class);
-                    totalSum+=data.getAmount();
-                    mycallback.onCallback(totalSum);
+                    if(data != null){
+                        ourPieData.add(data);
+                    }
+                }
+                if(!ourPieData.isEmpty()){
+                    expensePieChart.setVisibility(View.VISIBLE);
+                    noExpensePie.setVisibility(View.GONE);
+                    totalPieExpense.setVisibility(View.VISIBLE);
+                    PieData pieData = generatePieChartData(ourPieData);
+                    setPieChart(pieData, expensePieChart);
+                }else{
+                    totalPieExpense.setVisibility(View.GONE);
+                    expensePieChart.setVisibility(View.GONE);
+                    noExpensePie.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -169,16 +258,27 @@ public class DashBoardFragment extends Fragment {
         });
     }
 
-    private void getTotalIncome(Mycallback mycallback){
+    private void getTotalIncome(){
         mIncomeDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int totalSum =0;
-                for (DataSnapshot mysnap:snapshot.getChildren())
-                {
+                ourPieData.clear();
+                for (DataSnapshot mysnap:snapshot.getChildren()) {
                     Data data = mysnap.getValue(Data.class);
-                    totalSum+=data.getAmount();
-                    mycallback.onCallback(totalSum);
+                    if(data != null){
+                        ourPieData.add(data);
+                    }
+                }
+                if(!ourPieData.isEmpty()){
+                    incomePieChart.setVisibility(View.VISIBLE);
+                    noIncomePie.setVisibility(View.GONE);
+                    totalPieIncome.setVisibility(View.VISIBLE);
+                    PieData pieData = generatePieChartData(ourPieData);
+                    setPieChart(pieData, incomePieChart);
+                }else{
+                    incomePieChart.setVisibility(View.GONE);
+                    noIncomePie.setVisibility(View.VISIBLE);
+                    totalPieIncome.setVisibility(View.GONE);
                 }
             }
 
@@ -188,11 +288,40 @@ public class DashBoardFragment extends Fragment {
             }
 
         });
+    }
+
+    private PieData generatePieChartData(ArrayList<Data> data){
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+
+        for(Data d: data){
+            entries.add(new PieEntry((float)d.getAmount(), d.getType()));
+        }
+
+        PieDataSet ds = new PieDataSet(entries, "");
+        ds.setColors(ColorTemplate.COLORFUL_COLORS);
+        ds.setSliceSpace(2f);
+        ds.setValueTextColor(Color.WHITE);
+        ds.setValueTextSize(20f);
+
+        return new PieData(ds);
+    }
+
+    private void setPieChart(PieData data, PieChart pieChart){
+        pieChart.getDescription().setEnabled(false);
+        pieChart.setHoleRadius(30f);
+        pieChart.setTransparentCircleRadius(40f);
+        pieChart.setData(data);
+        Legend legend = pieChart.getLegend();
+        legend.setEnabled(false);
+        pieChart.animateXY(1000, 1000);
+        pieChart.setUsePercentValues(true);
+        pieChart.setClickable(true);
+        pieChart.invalidate();
     }
 
 
     //floating animation
-
     private  void ftAnimation(){
         if(isOpen)
         {
@@ -279,7 +408,6 @@ public class DashBoardFragment extends Fragment {
                     return;
 
                 }
-
 
                 int ouramountint=Integer.parseInt(amount);
 
@@ -372,11 +500,8 @@ dialog.show();
     @Override
     public void onStart() {
         super.onStart();
-//.....................................................................................
-
-
-// .....................................................................................
     }
+
     public  static  class  IncomeViewHolder extends  RecyclerView.ViewHolder{
 
         View mIncomeView;
@@ -407,6 +532,6 @@ dialog.show();
     }
 
     public interface Mycallback{
-        void onCallback(int a);
+        void onCallback(int a, int b);
     }
 }

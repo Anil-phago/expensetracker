@@ -1,5 +1,6 @@
 package com.example.expensetracker;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -33,7 +34,7 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         String amount = String.valueOf(datas.get(position).getAmount());
         holder.amount_txt_income.setText("Rs. " + amount);
