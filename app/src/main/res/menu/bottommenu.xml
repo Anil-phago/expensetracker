@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/dashboard"
-        android:title="DashBoard"
-        android:icon="@drawable/dashboard"
+        android:title="Home"
+        android:icon="@drawable/ic_icon_home_fill"
         />
     <item android:id="@+id/income"
         android:title="Income"
